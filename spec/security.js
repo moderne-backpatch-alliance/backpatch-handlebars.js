@@ -426,4 +426,20 @@ describe('security issues', function() {
             }, undefined, /Invalid AST: NumberLiteral value must be a number/);
         });
     });
+
+    describe('GH-1595', function() {
+      it('properties, that are required to be enumerable', function() {
+        shouldCompileTo('{{constructor}}', {}, '');
+        shouldCompileTo('{{__defineGetter__}}', {}, '');
+        shouldCompileTo('{{__defineSetter__}}', {}, '');
+        shouldCompileTo('{{__lookupGetter__}}', {}, '');
+        shouldCompileTo('{{__proto__}}', {}, '');
+
+        shouldCompileTo('{{lookup "constructor"}}', {}, '');
+        shouldCompileTo('{{lookup "__defineGetter__"}}', {}, '');
+        shouldCompileTo('{{lookup "__defineSetter__"}}', {}, '');
+        shouldCompileTo('{{lookup "__lookupGetter__"}}', {}, '');
+        shouldCompileTo('{{lookup "__proto__"}}', {}, '');
+      });
+    });
 });
