@@ -160,4 +160,17 @@ describe('security issues', function() {
             }, Error, /Invalid AST: PathExpression.depth must be an integer/);
         });
     });
+
+    describe('GHSA-9cx6-37pm-9jff: malformed decorators should fail safely', function() {
+        if (!Handlebars.compile) {
+            return;
+        }
+
+        it('should throw a controlled error for unknown decorators', function() {
+            var template = Handlebars.compile('{{*notRegistered}}');
+            shouldThrow(function() {
+                template({});
+            }, Error, /Missing decorator|not registered/);
+        });
+    });
 });
