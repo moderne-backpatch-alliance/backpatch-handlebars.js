@@ -1,0 +1,37 @@
+schema: osera-patch-evidence/0.1.0
+producer: moderne
+release: 4.0.15-backpatch-00001
+baseline: v4.0.14+backpatch.baseline
+fixes:
+  - cve: CVE-2019-19919
+    upstream_fix_url: https://github.com/handlebars-lang/handlebars.js/commit/156061eb7707575293613d7fdf90e2bdaac029ee
+    advisory_url: https://nvd.nist.gov/vuln/detail/CVE-2019-19919
+    patch_commit_url: https://github.com/moderne-backpatch-alliance/backpatch-handlebars.js/compare/b79b2e2~1...d9d08a9
+    basis: adapted
+    artifacts:
+      - handlebars
+    note: "New in this release; upstream's fix in 3.0.8, adapted to 4.0.14. It closes the advisory: Prototype Pollution in handlebars."
+  - cve: CVE-2019-20920
+    upstream_fix_url: https://github.com/handlebars-lang/handlebars.js/commit/d54137810a49939fd2ad01a91a34e182ece4528e
+    advisory_url: https://nvd.nist.gov/vuln/detail/CVE-2019-20920
+    patch_commit_url: https://github.com/moderne-backpatch-alliance/backpatch-handlebars.js/compare/b79b2e2~1...d9d08a9
+    basis: backport
+    artifacts:
+      - handlebars
+    note: "New in this release; upstream's fix in 4.5.2. The lookup helper coerces the field with String() before its dangerous-property check, so a field such as [\"constructor\"] no longer reaches the constructor; CVE-2019-19919's port of upstream's 3.x backport 156061e in this release already carries that coercion, as upstream's 4.x fix d541378 adds it, and this release adds upstream's GH-1603 regression test."
+  - cve: GHSA-2cf5-4w76-r9qv
+    upstream_fix_url: https://github.com/handlebars-lang/handlebars.js/commit/156061eb7707575293613d7fdf90e2bdaac029ee
+    advisory_url: https://github.com/advisories/GHSA-2cf5-4w76-r9qv
+    patch_commit_url: https://github.com/moderne-backpatch-alliance/backpatch-handlebars.js/compare/b79b2e2~1...d9d08a9
+    basis: adapted
+    artifacts:
+      - handlebars
+    note: "New in this release; upstream's fix in 3.0.8, adapted to 4.0.14. The same String() coercion of the lookup field as CVE-2019-20920 in this release (GHSA-2cf5-4w76-r9qv names the same fix)."
+tests:
+  commit: d9d08a95220bed10667228004316906e9c300750
+  command: grunt clean build amd uglify copy:dist, npm pack; spec/ at the commit with mocha 5.2.0, one process per env (runtime, browser, node, runtime-min, browser-min, verify-cjs, verify-runtime-cjs) on the packed package next to npmjs 4.0.14's dependencies; bin/handlebars -a spec/artifacts/empty.handlebars compared with spec/expected/empty.amd.js
+  runtime: Node.js v10.24.1, npm 6.14.12, mocha 5.2.0, grunt 1.0.4, devDependencies resolved as of the tag's commit time 2019-04-13T14:39:19Z, macOS 27.2 arm64
+  report: handlebars-4.0.15-backpatch-00001-tests.zip
+  report_sha256: 0f068eb53b3ca31923fd9bcf28d489aba5206528862ad9f7f8394cab0422a445
+  result: pass
+  note: "upstream's spec/ mocha suite in all seven entry envs (runtime, browser, node, their min builds, cjs and runtime cjs) on the packed package, plus the bin check at the tested commit: 4175 tests, 3993 passed, 0 failed, 182 skipped. The CVE tests (spec/security.js spec/security.js), with this release's production lines reverted at the tested commit: 14 tests, 0 passed, 14 failed, 0 skipped; with them: 14 tests, 14 passed, 0 failed, 0 skipped. Built with grunt (clean build amd uglify copy:dist) in a directory named handlebars, 88 of npmjs's 106 files for 4.0.14 are identical; the rest are dist/amd/handlebars/compiler/javascript-compiler.js, dist/amd/handlebars/helpers/lookup.js, dist/amd/handlebars/utils.js, dist/cjs/handlebars/compiler/javascript-compiler.js, dist/cjs/handlebars/helpers/lookup.js, dist/cjs/handlebars/utils.js, dist/handlebars.amd.js, dist/handlebars.amd.min.js, dist/handlebars.js, dist/handlebars.min.js, dist/handlebars.runtime.amd.js, dist/handlebars.runtime.amd.min.js, dist/handlebars.runtime.js, dist/handlebars.runtime.min.js, lib/handlebars/compiler/javascript-compiler.js, lib/handlebars/helpers/lookup.js, lib/handlebars/utils.js, package.json. The archive's file-origins.yaml maps each packaged file to the commit, or names its inputs and build."
