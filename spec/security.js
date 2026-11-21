@@ -173,4 +173,102 @@ describe('security issues', function() {
             }, Error, /Missing decorator|not registered/);
         });
     });
+
+    describe('GHSA-xw65-4hp5-5hc7: precompiled output must be safe in script tags', function() {
+        var name = '</script><script>alert(1)</script>';
+
+        function expectSafePrecompile(template, options) {
+            if (Handlebars.precompile) {
+                var precompiled = Handlebars.precompile(template, options);
+
+                equal(/<(!--|\/?script)/i.test(precompiled), false);
+                return precompiled;
+            }
+        }
+
+        it('should escape script tag delimiters in static content', function() {
+            var template = 'safe</ScRiPt ><span>alert(1)</script><SCRIPT>';
+            var precompiled = expectSafePrecompile(template);
+            if (precompiled) {
+                equal(precompiled.indexOf('\\u003C/ScRiPt >') !== -1, true);
+                equal(precompiled.indexOf('\\u003CSCRIPT>') !== -1, true);
+            }
+            shouldCompileTo(template, {}, template);
+        });
+
+        it('should escape HTML comment openers in static content', function() {
+            var template = '<!--<script>';
+            var precompiled = expectSafePrecompile(template);
+            if (precompiled) {
+                equal(precompiled.indexOf('\\u003C!--\\u003Cscript>') !== -1, true);
+            }
+            shouldCompileTo(template, {}, template);
+        });
+
+        it('should not escape other markup in static content', function() {
+            var template = '<div class="a"><span>b</span></div><!- ->';
+            var precompiled = expectSafePrecompile(template);
+            if (precompiled) {
+                equal(precompiled.indexOf('<div class=\\"a\\"><span>b</span></div><!- ->') !== -1, true);
+            }
+            shouldCompileTo(template, {}, template);
+        });
+
+        it('should escape script tag delimiters in string literals', function() {
+            expectSafePrecompile('{{echo "' + name + '" key="' + name + '"}}');
+            shouldCompileTo('{{{echo "' + name + '" key="' + name + '"}}}', [{}, {
+                echo: function(value, options) {
+                    return value + options.hash.key;
+                }
+            }], name + name);
+        });
+
+        it('should escape script tag delimiters in property lookups', function() {
+            var input = {};
+            input[name] = 'success';
+            expectSafePrecompile('{{[' + name + ']}}');
+            shouldCompileTo('{{[' + name + ']}}', input, 'success');
+            expectSafePrecompile('{{foo.[' + name + ']}}');
+            shouldCompileTo('{{foo.[' + name + ']}}', {foo: input}, 'success');
+        });
+
+        it('should escape script tag delimiters in data lookups', function() {
+            var data = {};
+            data[name] = 'success';
+            expectSafePrecompile('{{@[' + name + ']}}');
+            shouldCompileTo('{{@[' + name + ']}}', [{}, {}, {}, {}, data], 'success');
+        });
+
+        it('should escape script tag delimiters in helper and partial names', function() {
+            var helpers = {};
+            helpers[name] = function(options) {
+                return options.fn(this);
+            };
+            var partials = {};
+            partials[name] = 'success';
+            expectSafePrecompile('{{#[' + name + ']}}x{{/[' + name + ']}}');
+            shouldCompileTo('{{#[' + name + ']}}x{{/[' + name + ']}}', [{}, helpers], 'x');
+            expectSafePrecompile('{{> [' + name + ']}}');
+            shouldCompileToWithPartials('{{> [' + name + ']}}', [{}, {}, partials], true, 'success');
+        });
+
+        it('should escape script tag delimiters in compat mode lookups', function() {
+            var input = {};
+            input[name] = 'success';
+            expectSafePrecompile('{{[' + name + ']}}', {compat: true});
+            shouldCompileTo('{{[' + name + ']}}', [input, {}, {}, {compat: true}], 'success');
+        });
+
+        it('should escape script tag delimiters in tracked block param ids', function() {
+            var template = '{{#each items as |item|}}{{{id item.[' + name + ']}}}{{/each}}';
+            var item = {};
+            item[name] = 'value';
+            expectSafePrecompile(template, {trackIds: true});
+            shouldCompileTo(template, [{items: [item]}, {
+                id: function(value, options) {
+                    return options.ids[0];
+                }
+            }, {}, {trackIds: true}], 'items.0.' + name);
+        });
+    });
 });

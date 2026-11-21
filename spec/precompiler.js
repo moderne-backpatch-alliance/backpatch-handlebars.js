@@ -223,6 +223,27 @@ describe('precompiler', function() {
     equal(log.match(/sourceMappingURL=/g).length, 1);
   });
 
+  it('should escape script tag delimiters in template names', function() {
+    var name = '</script><script>alert(1)</script><!--';
+    Precompiler.cli({templates: [{name: name, source: ''}]});
+    var output = log;
+
+    equal(/<(!--|\/?script)/i.test(output), false);
+    var quotedName = output.match(/templates\[("(?:[^"\\]|\\.)*")\]/);
+    equal(JSON.parse(quotedName[1]), name);
+  });
+
+  it('should escape line separators in template names', function() {
+    var name = 'a' + String.fromCharCode(0x2028) + 'b' + String.fromCharCode(0x2029);
+    Precompiler.cli({templates: [{name: name, source: ''}]});
+    var output = log;
+
+    equal(output.indexOf(String.fromCharCode(0x2028)), -1);
+    equal(output.indexOf(String.fromCharCode(0x2029)), -1);
+    var quotedName = output.match(/templates\[("(?:[^"\\]|\\.)*")\]/);
+    equal(JSON.parse(quotedName[1]), name);
+  });
+
   describe('#loadTemplates', function() {
     it('should throw on missing template', function(done) {
       Precompiler.loadTemplates({files: ['foo']}, function(err) {
