@@ -1,6 +1,6 @@
 schema: osera-patch-evidence/0.1.0
 producer: moderne
-release: 4.0.15-backpatch-00002
+release: 4.0.15-backpatch-00003
 baseline: v4.0.14+backpatch.baseline
 fixes:
   - cve: CVE-2019-19919
@@ -34,12 +34,36 @@ fixes:
     basis: backport
     artifacts:
       - handlebars
-    note: "New in this release; upstream's fix in 4.7.7. It closes the advisory: Prototype Pollution in handlebars."
+    note: "Carried from 4.0.15-backpatch-00002; upstream's fix in 4.7.7. It closes the advisory: Prototype Pollution in handlebars."
+  - cve: CVE-2026-33937
+    upstream_fix_url: https://github.com/handlebars-lang/handlebars.js/commit/68d8df5a88e0a26fe9e6084c5c6aaebe67b07da2
+    advisory_url: https://nvd.nist.gov/vuln/detail/CVE-2026-33937
+    patch_commit_url: https://github.com/moderne-backpatch-alliance/backpatch-handlebars.js/commit/0d378ec
+    basis: adapted
+    artifacts:
+      - handlebars
+    note: "New in this release; upstream's fix in 4.7.9, adapted to 4.0.14. A pre-parsed AST passed to compile or precompile is validated before code generation (PathExpression depth, parts, NumberLiteral and BooleanLiteral values), the lib/handlebars/compiler/base.js part of upstream's fix, which closes CVE-2026-33937, CVE-2026-33938 and CVE-2026-33940 with the same hunk."
+  - cve: CVE-2026-33938
+    upstream_fix_url: https://github.com/handlebars-lang/handlebars.js/commit/68d8df5a88e0a26fe9e6084c5c6aaebe67b07da2
+    advisory_url: https://nvd.nist.gov/vuln/detail/CVE-2026-33938
+    patch_commit_url: https://github.com/moderne-backpatch-alliance/backpatch-handlebars.js/commit/0d378ec
+    basis: adapted
+    artifacts:
+      - handlebars
+    note: "New in this release; upstream's fix in 4.7.9, adapted to 4.0.14. The same base.js AST validation as CVE-2026-33937 in this release closes the @partial-block AST type confusion, to the extent upstream's 4.7.9 does."
+  - cve: CVE-2026-33940
+    upstream_fix_url: https://github.com/handlebars-lang/handlebars.js/commit/68d8df5a88e0a26fe9e6084c5c6aaebe67b07da2
+    advisory_url: https://nvd.nist.gov/vuln/detail/CVE-2026-33940
+    patch_commit_url: https://github.com/moderne-backpatch-alliance/backpatch-handlebars.js/commit/0d378ec
+    basis: adapted
+    artifacts:
+      - handlebars
+    note: "New in this release; upstream's fix in 4.7.9, adapted to 4.0.14. The same base.js AST validation as CVE-2026-33937 in this release rejects pre-parsed AST node values that would be written into generated code."
 tests:
-  commit: 03314606ad3fce5273d5bb1c37e0e5556c901e9d
+  commit: 0d378eca8a78b911c0a98b1b4a4de0ee8bb3ee1c
   command: grunt clean build amd uglify copy:dist, npm pack; spec/ at the commit with mocha 5.2.0, one process per env (runtime, browser, node, runtime-min, browser-min, verify-cjs, verify-runtime-cjs) on the packed package next to npmjs 4.0.14's dependencies; bin/handlebars -a spec/artifacts/empty.handlebars compared with spec/expected/empty.amd.js
   runtime: Node.js v10.24.1, npm 6.14.12, mocha 5.2.0, grunt 1.0.4, devDependencies resolved as of the tag's commit time 2019-04-13T14:39:19Z, macOS 27.2 arm64
-  report: handlebars-4.0.15-backpatch-00002-tests.zip
-  report_sha256: 6092f4ac34ab3c79afb34c36dc8e459f8803a18429b85df2d4157a916d09a7af
+  report: handlebars-4.0.15-backpatch-00003-tests.zip
+  report_sha256: 188eec5b22d7f0db689439fb6c94cd39031021cd4b26479a0fad5eb1d9a1d3f7
   result: pass
-  note: "upstream's spec/ mocha suite in all seven entry envs (runtime, browser, node, their min builds, cjs and runtime cjs) on the packed package, plus the bin check at the tested commit: 4196 tests, 4014 passed, 0 failed, 182 skipped. The CVE tests (spec/security.js), with this release's production lines reverted at the tested commit: 21 tests, 14 passed, 7 failed, 0 skipped; with them: 21 tests, 21 passed, 0 failed, 0 skipped. Built with grunt (clean build amd uglify copy:dist) in a directory named handlebars, 88 of npmjs's 106 files for 4.0.14 are identical; the rest are dist/amd/handlebars/compiler/javascript-compiler.js, dist/amd/handlebars/helpers/lookup.js, dist/amd/handlebars/utils.js, dist/cjs/handlebars/compiler/javascript-compiler.js, dist/cjs/handlebars/helpers/lookup.js, dist/cjs/handlebars/utils.js, dist/handlebars.amd.js, dist/handlebars.amd.min.js, dist/handlebars.js, dist/handlebars.min.js, dist/handlebars.runtime.amd.js, dist/handlebars.runtime.amd.min.js, dist/handlebars.runtime.js, dist/handlebars.runtime.min.js, lib/handlebars/compiler/javascript-compiler.js, lib/handlebars/helpers/lookup.js, lib/handlebars/utils.js, package.json. The archive's file-origins.yaml maps each packaged file to the commit, or names its inputs and build."
+  note: "upstream's spec/ mocha suite in all seven entry envs (runtime, browser, node, their min builds, cjs and runtime cjs) on the packed package, plus the bin check at the tested commit: 4236 tests, 4054 passed, 0 failed, 182 skipped. The CVE tests (spec/compiler.js spec/security.js), with this release's production lines reverted at the tested commit: 49 tests, 25 passed, 24 failed, 0 skipped; with them: 49 tests, 49 passed, 0 failed, 0 skipped. Built with grunt (clean build amd uglify copy:dist) in a directory named handlebars, 85 of npmjs's 106 files for 4.0.14 are identical; the rest are dist/amd/handlebars/compiler/base.js, dist/amd/handlebars/compiler/javascript-compiler.js, dist/amd/handlebars/helpers/lookup.js, dist/amd/handlebars/utils.js, dist/cjs/handlebars/compiler/base.js, dist/cjs/handlebars/compiler/javascript-compiler.js, dist/cjs/handlebars/helpers/lookup.js, dist/cjs/handlebars/utils.js, dist/handlebars.amd.js, dist/handlebars.amd.min.js, dist/handlebars.js, dist/handlebars.min.js, dist/handlebars.runtime.amd.js, dist/handlebars.runtime.amd.min.js, dist/handlebars.runtime.js, dist/handlebars.runtime.min.js, lib/handlebars/compiler/base.js, lib/handlebars/compiler/javascript-compiler.js, lib/handlebars/helpers/lookup.js, lib/handlebars/utils.js, package.json. The archive's file-origins.yaml maps each packaged file to the commit, or names its inputs and build. Untested vector for CVE-2026-33938: the tests pass crafted ASTs to compile and precompile and through a dynamic partial lookup; the advisory's own path, an AST planted in @partial-block and compiled by invokePartial, is not run as a test (the validation sits in parse, which that path also goes through)."
