@@ -393,5 +393,48 @@ describe('precompiler', function() {
         false
       );
     });
+
+    function runCliWithSourceMap(options) {
+      var oldWriteFileSync = fs.writeFileSync;
+      fs.writeFileSync = function() {};
+      try {
+        return runCliAndCaptureOutput(options);
+      } finally {
+        fs.writeFileSync = oldWriteFileSync;
+      }
+    }
+
+    it('should sanitize sourceMappingURL comment values when minifying', function() {
+      var output = runCliWithSourceMap({
+        templates: [{ name: 'safe', path: 'safe.handlebars', source: 'x' }],
+        min: true,
+        map: 'good.js.map\n;global.__xjpjMinMap=1;//'
+      });
+
+      equal(
+        output.indexOf('sourceMappingURL=good.js.map;global.__xjpjMinMap=1;//') !== -1,
+        true
+      );
+      equal(
+        /sourceMappingURL=[^\n]*\n;global\.__xjpjMinMap=1/.test(output),
+        false
+      );
+    });
+
+    it('should percent-encode "<" in sourceMappingURL comment values', function() {
+      [false, true].forEach(function(min) {
+        var output = runCliWithSourceMap({
+          templates: [{ name: 'safe', path: 'safe.handlebars', source: 'x' }],
+          min: min,
+          map: '</script><!--<script>.map'
+        });
+
+        equal(
+          output.indexOf('sourceMappingURL=%3C/script>%3C!--%3Cscript>.map') !== -1,
+          true
+        );
+        equal(/<(!--|\/?script)/i.test(output), false);
+      });
+    });
   });
 });
