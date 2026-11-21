@@ -65,4 +65,17 @@ describe('security issues', function() {
             shouldCompileTo('{{lookup this "__proto__"}}', {}, '');
         });
     });
+
+    describe('escapes template variables', function() {
+        it('in compat mode', function() {
+            shouldCompileTo("{{'a\\b'}}", [{ 'a\\b': 'c' }, undefined, undefined, { compat: true }], 'c');
+        });
+
+        it('in default mode', function() {
+            shouldCompileTo("{{'a\\b'}}", { 'a\\b': 'c' }, 'c');
+        });
+        it('in default mode', function() {
+            shouldCompileTo("{{'a\\b'}}", [{ 'a\\b': 'c' }, undefined, undefined, { strict: true }], 'c');
+        });
+    });
 });
