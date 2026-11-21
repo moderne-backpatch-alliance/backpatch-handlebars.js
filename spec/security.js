@@ -32,4 +32,20 @@ describe('security issues', function() {
 
         });
     });
+
+    describe('GH-1595', function() {
+        it('properties, that are required to be enumerable', function() {
+            shouldCompileTo('{{constructor.name}}', {}, '');
+            shouldCompileTo('{{__defineGetter__.name}}', {}, '');
+            shouldCompileTo('{{__defineSetter__.name}}', {}, '');
+            shouldCompileTo('{{__lookupGetter__.name}}', {}, '');
+            shouldCompileTo('{{__proto__.__defineGetter__.name}}', {}, '');
+
+            shouldCompileTo('{{lookup this "constructor"}}', {}, '');
+            shouldCompileTo('{{lookup this "__defineGetter__"}}', {}, '');
+            shouldCompileTo('{{lookup this "__defineSetter__"}}', {}, '');
+            shouldCompileTo('{{lookup this "__lookupGetter__"}}', {}, '');
+            shouldCompileTo('{{lookup this "__proto__"}}', {}, '');
+        });
+    });
 });
