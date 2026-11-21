@@ -1,6 +1,6 @@
 schema: osera-patch-evidence/0.1.0
 producer: moderne
-release: 4.0.15-backpatch-00007
+release: 4.0.15-backpatch-00008
 baseline: v4.0.14+backpatch.baseline
 fixes:
   - cve: CVE-2019-19919
@@ -90,12 +90,28 @@ fixes:
     basis: adapted
     artifacts:
       - handlebars
-    note: "New in this release; upstream's fix in 4.7.10, adapted to 4.0.14. It closes the advisory: Handlebars: JavaScript Injection via AST Type Confusion in compile (bypass of CVE-2026-33937)."
+    note: "Carried from 4.0.15-backpatch-00007; upstream's fix in 4.7.10, adapted to 4.0.14. It closes the advisory: Handlebars: JavaScript Injection via AST Type Confusion in compile (bypass of CVE-2026-33937)."
+  - cve: GHSA-g9r4-xpmj-mj65
+    upstream_fix_url: https://github.com/handlebars-lang/handlebars.js/commit/198887808780bbef9dba67a8af68ece091d5baa7
+    advisory_url: https://github.com/advisories/GHSA-g9r4-xpmj-mj65
+    patch_commit_url: https://github.com/moderne-backpatch-alliance/backpatch-handlebars.js/compare/32d7a28~1...c7c371e
+    basis: adapted
+    artifacts:
+      - handlebars
+    note: "New in this release; upstream's fix in 4.5.3 (1988878, f7f05d7), adapted to 4.0.14. It closes the advisory: Prototype Pollution in handlebars."
+  - cve: GHSA-q2c6-c6pm-g3gh
+    upstream_fix_url: https://github.com/handlebars-lang/handlebars.js/commit/198887808780bbef9dba67a8af68ece091d5baa7
+    advisory_url: https://github.com/advisories/GHSA-q2c6-c6pm-g3gh
+    patch_commit_url: https://github.com/moderne-backpatch-alliance/backpatch-handlebars.js/compare/32d7a28~1...c7c371e
+    basis: adapted
+    artifacts:
+      - handlebars
+    note: "New in this release; upstream's fix in 4.5.3 (1988878, f7f05d7), adapted to 4.0.14. It closes the advisory: Arbitrary Code Execution in handlebars."
 tests:
-  commit: 5e77ad1dc9697f28dfcbcf69856316e9c3fe1949
+  commit: c7c371efb9299cca5add21ebb3e13a795acb5271
   command: grunt clean build amd uglify copy:dist, npm pack; spec/ at the commit with mocha 5.2.0, one process per env (runtime, browser, node, runtime-min, browser-min, verify-cjs, verify-runtime-cjs) on the packed package next to npmjs 4.0.14's dependencies; bin/handlebars -a spec/artifacts/empty.handlebars compared with spec/expected/empty.amd.js
   runtime: Node.js v10.24.1, npm 6.14.12, mocha 5.2.0, grunt 1.0.4, devDependencies resolved as of the tag's commit time 2019-04-13T14:39:19Z, macOS 27.2 arm64
-  report: handlebars-4.0.15-backpatch-00007-tests.zip
-  report_sha256: be67491969a688882f4c2a9cdee7617cacc21bbe0d917d1aa5bd2d5c4bb45b6d
+  report: handlebars-4.0.15-backpatch-00008-tests.zip
+  report_sha256: f9d9b22348965b0005ff92e394e11b2856ee958130fbc7ad817ff80a319eb89c
   result: pass
-  note: "upstream's spec/ mocha suite in all seven entry envs (runtime, browser, node, their min builds, cjs and runtime cjs) on the packed package, plus the bin check at the tested commit: 4423 tests, 4241 passed, 0 failed, 182 skipped. The CVE tests (spec/compiler.js spec/security.js), with this release's production lines reverted at the tested commit: 105 tests, 37 passed, 68 failed, 0 skipped; with them: 105 tests, 105 passed, 0 failed, 0 skipped. Built with grunt (clean build amd uglify copy:dist) in a directory named handlebars, 76 of npmjs's 106 files for 4.0.14 are identical; the rest are dist/amd/handlebars/compiler/code-gen.js, dist/amd/handlebars/compiler/compiler.js, dist/amd/handlebars/compiler/javascript-compiler.js, dist/amd/handlebars/exception.js, dist/amd/handlebars/helpers/lookup.js, dist/amd/handlebars/utils.js, dist/amd/precompiler.js, dist/cjs/handlebars/compiler/code-gen.js, dist/cjs/handlebars/compiler/compiler.js, dist/cjs/handlebars/compiler/javascript-compiler.js, dist/cjs/handlebars/exception.js, dist/cjs/handlebars/helpers/lookup.js, dist/cjs/handlebars/utils.js, dist/cjs/precompiler.js, dist/handlebars.amd.js, dist/handlebars.amd.min.js, dist/handlebars.js, dist/handlebars.min.js, dist/handlebars.runtime.amd.js, dist/handlebars.runtime.amd.min.js, dist/handlebars.runtime.js, dist/handlebars.runtime.min.js, lib/handlebars/compiler/code-gen.js, lib/handlebars/compiler/compiler.js, lib/handlebars/compiler/javascript-compiler.js, lib/handlebars/exception.js, lib/handlebars/helpers/lookup.js, lib/handlebars/utils.js, lib/precompiler.js, package.json. The archive's file-origins.yaml maps each packaged file to the commit, or names its inputs and build."
+  note: "upstream's spec/ mocha suite in all seven entry envs (runtime, browser, node, their min builds, cjs and runtime cjs) on the packed package, plus the bin check at the tested commit: 4430 tests, 4248 passed, 0 failed, 182 skipped. The CVE tests (spec/security.js), with this release's production lines reverted at the tested commit: 14 tests, 7 passed, 7 failed, 0 skipped; with them: 14 tests, 14 passed, 0 failed, 0 skipped. Built with grunt (clean build amd uglify copy:dist) in a directory named handlebars, 76 of npmjs's 106 files for 4.0.14 are identical; the rest are dist/amd/handlebars/compiler/code-gen.js, dist/amd/handlebars/compiler/compiler.js, dist/amd/handlebars/compiler/javascript-compiler.js, dist/amd/handlebars/exception.js, dist/amd/handlebars/helpers/lookup.js, dist/amd/handlebars/utils.js, dist/amd/precompiler.js, dist/cjs/handlebars/compiler/code-gen.js, dist/cjs/handlebars/compiler/compiler.js, dist/cjs/handlebars/compiler/javascript-compiler.js, dist/cjs/handlebars/exception.js, dist/cjs/handlebars/helpers/lookup.js, dist/cjs/handlebars/utils.js, dist/cjs/precompiler.js, dist/handlebars.amd.js, dist/handlebars.amd.min.js, dist/handlebars.js, dist/handlebars.min.js, dist/handlebars.runtime.amd.js, dist/handlebars.runtime.amd.min.js, dist/handlebars.runtime.js, dist/handlebars.runtime.min.js, lib/handlebars/compiler/code-gen.js, lib/handlebars/compiler/compiler.js, lib/handlebars/compiler/javascript-compiler.js, lib/handlebars/exception.js, lib/handlebars/helpers/lookup.js, lib/handlebars/utils.js, lib/precompiler.js, package.json. The archive's file-origins.yaml maps each packaged file to the commit, or names its inputs and build."
