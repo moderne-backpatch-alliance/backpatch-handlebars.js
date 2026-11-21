@@ -78,4 +78,86 @@ describe('security issues', function() {
             shouldCompileTo("{{'a\\b'}}", [{ 'a\\b': 'c' }, undefined, undefined, { strict: true }], 'c');
         });
     });
+
+    describe('GHSA-2w6w-674q-4c4q, GHSA-xhpv-hc6g-r9c6, GHSA-3mfm-83xf-c92r: untrusted AST inputs', function() {
+        if (!Handlebars.compile) {
+            return;
+        }
+
+        function createInjectedProgram() {
+            return {
+                type: 'Program',
+                body: [
+                    {
+                        type: 'MustacheStatement',
+                        escaped: true,
+                        strip: {
+                            open: false,
+                            close: false
+                        },
+                        path: {
+                            type: 'PathExpression',
+                            data: false,
+                            depth: 0,
+                            parts: ['lookup'],
+                            original: 'lookup'
+                        },
+                        params: [
+                            {
+                                type: 'PathExpression',
+                                data: false,
+                                depth: 0,
+                                parts: [],
+                                original: 'this'
+                            },
+                            {
+                                type: 'NumberLiteral',
+                                value: '{},{})) + (Function) + (({}',
+                                original: 1
+                            }
+                        ]
+                    }
+                ]
+            };
+        }
+
+        it('should reject AST NumberLiteral type confusion in compile()', function() {
+            shouldThrow(function() {
+                var template = Handlebars.compile(createInjectedProgram());
+                template({});
+            }, Error, /Invalid AST/);
+        });
+
+        it('should reject AST objects passed via dynamic partial lookup', function() {
+            shouldThrow(function() {
+                var template = Handlebars.compile('{{> (lookup . "payload")}}');
+                template({
+                    payload: createInjectedProgram()
+                });
+            }, Error, /Invalid AST|could not be found/);
+        });
+
+        it('should reject a callable-looking AST object passed via dynamic partial lookup', function() {
+            // `call: true` makes resolvePartial() return the object, so it reaches env.compile();
+            // without it the lookup ends in "could not be found" and the validation is not reached.
+            shouldThrow(function() {
+                var template = Handlebars.compile('{{> (lookup . "payload")}}');
+                template({
+                    payload: {
+                        call: true,
+                        type: 'Program',
+                        body: [
+                            {
+                                type: 'MustacheStatement',
+                                escaped: true,
+                                strip: {open: false, close: false},
+                                path: {type: 'PathExpression', data: false, depth: '0', parts: ['this'], original: 'this'},
+                                params: []
+                            }
+                        ]
+                    }
+                });
+            }, Error, /Invalid AST: PathExpression.depth must be an integer/);
+        });
+    });
 });
