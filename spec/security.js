@@ -442,4 +442,33 @@ describe('security issues', function() {
         shouldCompileTo('{{lookup "__proto__"}}', {}, '');
       });
     });
+
+    describe('GH-1595 own non-enumerable properties', function() {
+      var names = ['constructor', '__defineGetter__', '__defineSetter__', '__lookupGetter__', '__proto__'];
+
+      function withOwn(name, enumerable) {
+        var obj = {};
+        Object.defineProperty(obj, name, { value: 'own', enumerable: enumerable });
+        return obj;
+      }
+
+      it('are not resolved by a template lookup', function() {
+        names.forEach(function(name) {
+          shouldCompileTo('{{' + name + '}}', withOwn(name, false), '', name);
+        });
+      });
+
+      it('are not resolved by the lookup helper', function() {
+        names.forEach(function(name) {
+          shouldCompileTo('{{lookup this "' + name + '"}}', withOwn(name, false), '', name);
+        });
+      });
+
+      it('own enumerable properties are still resolved', function() {
+        names.forEach(function(name) {
+          shouldCompileTo('{{' + name + '}}', withOwn(name, true), 'own', name);
+          shouldCompileTo('{{lookup this "' + name + '"}}', withOwn(name, true), 'own', name);
+        });
+      });
+    });
 });
